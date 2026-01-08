@@ -1,42 +1,103 @@
 # Backend Technical Test - Leave Management System
 
-Sistem Manajemen Cuti Karyawan (RESTful API) yang dibangun untuk seleksi Magang Mandiri SEAL Batch 1 2026. Proyek ini menerapkan prinsip **Clean Architecture** untuk memastikan kode yang *scalable*, *maintainable*, dan *testable*.
+Sistem RESTful API untuk manajemen cuti karyawan yang dibangun menggunakan **Laravel 11**. Proyek ini menerapkan prinsip **Clean Architecture** (Service-Repository Pattern) untuk memastikan kode yang *scalable*, *testable*, dan *maintainable*, serta mendukung otentikasi ganda (Konvensional & OAuth).
 
 ## 🛠 Tech Stack
-- **Framework:** Laravel 10/11
-- **Language:** PHP 8.2+
+- **Framework:** Laravel 11
 - **Database:** MySQL
-- **Authentication:** Laravel Sanctum (JWT) & Laravel Socialite (Google OAuth)
-- **Architecture:** Service-Repository Pattern with Dependency Injection
+- **Authentication:** - **Laravel Sanctum** (Token-based Auth)
+  - **Laravel Socialite** (Google OAuth Integration)
+- **Architecture:** Service-Repository Design Pattern
 
-## 🏗 Architecture Overview (Nilai Plus)
-Sistem ini tidak menaruh logika bisnis di dalam Controller. Saya menerapkan **Service-Repository Pattern** untuk memisahkan *concern* aplikasi:
+## 🏗 Architecture Overview (Clean Code)
+Sistem ini dirancang untuk tidak menumpuk logika bisnis di dalam Controller (*Skinny Controller*). Saya memisahkan tanggung jawab kode ke dalam beberapa layer:
 
-### 1. Layering Structure
-- **Interfaces (`App\Interfaces`)**:
-  Menyediakan kontrak standar. Ini memungkinkan kita mengganti implementasi database (misal dari MySQL ke PostgreSQL) tanpa mengubah kode bisnis sedikitpun.
-  
-- **Repositories (`App\Repositories`)**:
-  *Data Access Layer*. Bertanggung jawab murni untuk komunikasi ke database (Eloquent Queries). Controller tidak boleh tahu cara query DB secara langsung.
+### 1. The Layers
+* **Interfaces (`App\Interfaces`)**
+    Menyediakan kontrak standar untuk Repository. Ini menerapkan prinsip *Dependency Inversion*, memudahkan jika suatu saat perlu mengganti implementasi database tanpa merusak logika bisnis.
 
-- **Services (`App\Services`)**:
-  *Business Logic Layer*. "Otak" dari aplikasi. Semua aturan bisnis validasi kompleks ada di sini.
-  > **Contoh Implementasi:** Logika pengecekan kuota "Maksimal 12 Hari per Tahun" dilakukan di `LeaveService`, bukan di Controller.
+* **Repositories (`App\Repositories`)** *(Data Access Layer)*
+    Bertanggung jawab murni untuk komunikasi ke database (Eloquent Queries). Layer ini mengabstraksi kompleksitas query SQL dari layer bisnis.
 
-- **Controllers (`App\Http\Controllers`)**:
-  Hanya bertugas menerima Request HTTP, memanggil Service, dan mengembalikan Response JSON. Controller tetap "bersih" (*Skinny Controllers*).
+* **Services (`App\Services`)** *(Business Logic Layer)*
+    Ini adalah "otak" dari aplikasi. Semua validasi bisnis kompleks terjadi di sini, bukan di Controller.
+    * *Contoh:* Logika pengecekan sisa kuota (Max 12 hari) dan penghitungan durasi cuti dilakukan di `LeaveService`.
 
-### 2. Design Pattern Benefits
-- **Separation of Concerns:** Perubahan pada logika database tidak merusak logika bisnis.
-- **Reusability:** Logika hitung kuota cuti bisa dipanggil dari API, Command Line, atau Job Queue tanpa duplikasi kode.
-- **Security:** Validasi input dan otorisasi role (Admin/Employee) dilakukan berlapis (Middleware & Service).
+* **Controllers (`App\Http\Controllers`)** *(Presentation Layer)*
+    Hanya bertugas menerima HTTP Request, memanggil Service yang sesuai, dan mengembalikan JSON Response standar.
+
+### 2. Alur Request (Flow)
+`User Request` -> `Route` -> `Controller` -> `Service (Validasi Bisnis)` -> `Repository (Query DB)` -> `Database`.
+
+---
 
 ## 🚀 Fitur Utama
-1. **Otentikasi Ganda:** Login email/password konvensional & Login Google (OAuth).
-2. **Role Management:**
-   - **Employee:** Mengajukan cuti, melihat status sendiri.
-   - **Admin:** Melihat semua pengajuan, menyetujui/menolak (Approve/Reject).
-3. **Validasi Bisnis:**
-   - Cek otomatis sisa kuota (Limit 12 hari/tahun).
-   - Validasi tanggal (End Date tidak boleh sebelum Start Date).
-   - Upload bukti lampiran (File handling).
+
+### 1. Authentication & Authorization
+* **Hybrid Login:** Mendukung login email/password dan **Google OAuth**.
+* **Role Management:**
+    * **Employee:** Hanya dapat mengajukan cuti dan melihat riwayat pengajuan miliknya sendiri.
+    * **Admin:** Memiliki akses penuh melihat semua pengajuan dan melakukan eksekusi (*Approve/Reject*).
+
+### 2. Manajemen Cuti (Business Logic)
+* **Validasi Kuota:** Sistem otomatis menghitung total cuti yang diambil tahun berjalan. Jika melebihi **12 hari**, pengajuan otomatis ditolak oleh Service.
+* **Penghitungan Durasi:** Durasi cuti dihitung otomatis berdasarkan *Start Date* dan *End Date*.
+* **File Attachment:** Mendukung upload bukti pendukung (surat dokter, dll).
+
+---
+
+## ⚙️ Panduan Instalasi (Setup)
+
+Ikuti langkah ini untuk menjalankan proyek di lokal:
+
+1.  **Clone Repository**
+    ```bash
+    git clone <URL_REPO_GITHUB_KAMU>
+    cd <NAMA_FOLDER>
+    ```
+
+2.  **Install Dependencies**
+    ```bash
+    composer install
+    ```
+
+3.  **Setup Environment**
+    Salin file `.env` dan sesuaikan konfigurasi Database & Google OAuth.
+    ```bash
+    cp .env.example .env
+    ```
+    *Pastikan mengisi:*
+    ```ini
+    DB_DATABASE=seal_db
+    GOOGLE_CLIENT_ID=your_client_id
+    GOOGLE_CLIENT_SECRET=your_client_secret
+    GOOGLE_REDIRECT_URL=[http://127.0.0.1:8000/api/auth/google/callback](http://127.0.0.1:8000/api/auth/google/callback)
+    ```
+
+4.  **Database Setup**
+    Jalankan migrasi dan seeder untuk membuat akun Admin & Employee default.
+    ```bash
+    php artisan key:generate
+    php artisan storage:link
+    php artisan migrate --seed
+    ```
+
+5.  **Jalankan Server**
+    ```bash
+    php artisan serve
+    ```
+
+---
+
+## 📖 Dokumentasi API (Postman)
+
+Dokumentasi lengkap mengenai Endpoint, Payload Request, dan Contoh Response dapat dilihat pada link berikut:
+
+👉 **https://documenter.getpostman.com/view/42835150/2sBXVeFXVg**
+
+### Akun Testing (Seeder)
+* **Admin:** `admin@seal.com` | Pass: `password`
+* **Employee:** `employee@seal.com` | Pass: `password`
+
+---
+Dibuat oleh: **Edwin Santoso**

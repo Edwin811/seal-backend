@@ -21,14 +21,15 @@ class LeaveService
         $start = Carbon::parse($data['start_date']);
         $end = Carbon::parse($data['end_date']);
         
-        // Hitung durasi (inclusive)
-        $daysRequested = $end->diffInDays($start) + 1;
+        // PERBAIKAN: Gunakan abs() agar hasil selalu POSITIF
+        // Hitung selisih hari + 1 (inclusive)
+        $daysRequested = abs($start->diffInDays($end)) + 1;
 
-        // Aturan Bisnis: Cek Kuota 12 Hari per Tahun
         $usedDays = $this->leaveRepo->countApprovedDays($user->id, $start->year);
-        
+
+        // Validasi Kuota (Max 12)
         if (($usedDays + $daysRequested) > 12) {
-            throw new Exception("Kuota cuti tidak mencukupi. Sisa kuota Anda tahun ini: " . (12 - $usedDays) . " hari.");
+            throw new Exception("Kuota cuti tidak mencukupi. Anda meminta {$daysRequested} hari, sisa kuota: " . (12 - $usedDays) . " hari.");
         }
 
         // Handle File Upload
@@ -38,7 +39,7 @@ class LeaveService
         }
 
         $data['user_id'] = $user->id;
-        $data['status'] = 'pending'; // Default status
+        $data['status'] = 'pending'; 
 
         return $this->leaveRepo->create($data);
     }
