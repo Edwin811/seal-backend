@@ -17,8 +17,6 @@ class LeaveRequest extends Model
         'attachment',
         'status',
     ];
-
-    // Relasi ke User
     public function user()
     {
         return $this->belongsTo(User::class);

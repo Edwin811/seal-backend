@@ -19,7 +19,7 @@ class LeaveController extends Controller
 
     public function index(Request $request)
     {
-        // Role Management: Admin lihat semua, Employee lihat punya sendiri
+        
         if ($request->user()->role === 'admin') {
             $data = $this->leaveRepo->getAll();
         } else {
@@ -30,7 +30,7 @@ class LeaveController extends Controller
 
     public function store(Request $request)
     {
-        // Validasi Input
+        
         $request->validate([
             'start_date' => 'required|date',
             'end_date'   => 'required|date|after_or_equal:start_date',
@@ -39,7 +39,7 @@ class LeaveController extends Controller
         ]);
 
         try {
-            // Panggil Service untuk logika kuota & upload
+            
             $leave = $this->leaveService->requestLeave(
                 $request->user(), 
                 $request->all(), 
@@ -54,7 +54,7 @@ class LeaveController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        // Authorization: Hanya Admin
+        
         if ($request->user()->role !== 'admin') {
             return response()->json(['message' => 'Forbidden Access'], 403);
         }

@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens; // <--- WAJIB ADA UNTUK CREATE TOKEN
+use Laravel\Sanctum\HasApiTokens; 
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable; // <--- WAJIB DIPANGGIL DI SINI
+    use HasApiTokens, HasFactory, Notifiable; 
 
     /**
      * The attributes that are mass assignable.
@@ -21,8 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'google_id', // Tambahan untuk OAuth
-        'role',      // Tambahan untuk Role
+        'google_id', 
+        'role',      
     ];
 
     /**
@@ -48,7 +48,7 @@ class User extends Authenticatable
         ];
     }
 
-    // Relasi ke LeaveRequest
+    
     public function leaveRequests()
     {
         return $this->hasMany(LeaveRequest::class);

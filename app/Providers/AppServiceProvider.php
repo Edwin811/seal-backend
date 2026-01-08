@@ -10,12 +10,10 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        // Binding Interface ke Repository
         $this->app->bind(LeaveRepositoryInterface::class, LeaveRepository::class);
     }
 
     public function boot(): void
     {
-        //
     }
 }

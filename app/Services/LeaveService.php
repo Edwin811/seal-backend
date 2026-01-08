@@ -21,18 +21,18 @@ class LeaveService
         $start = Carbon::parse($data['start_date']);
         $end = Carbon::parse($data['end_date']);
         
-        // PERBAIKAN: Gunakan abs() agar hasil selalu POSITIF
-        // Hitung selisih hari + 1 (inclusive)
+        
+        
         $daysRequested = abs($start->diffInDays($end)) + 1;
 
         $usedDays = $this->leaveRepo->countApprovedDays($user->id, $start->year);
 
-        // Validasi Kuota (Max 12)
+        
         if (($usedDays + $daysRequested) > 12) {
             throw new Exception("Kuota cuti tidak mencukupi. Anda meminta {$daysRequested} hari, sisa kuota: " . (12 - $usedDays) . " hari.");
         }
 
-        // Handle File Upload
+        
         if ($file) {
             $path = $file->store('attachments', 'public');
             $data['attachment'] = $path;

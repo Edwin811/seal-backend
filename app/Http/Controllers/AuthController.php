@@ -9,7 +9,7 @@ use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
-    // Login Konvensional (Email/Pass)
+    
     public function login(Request $request)
     {
         $creds = $request->validate([
@@ -31,13 +31,13 @@ class AuthController extends Controller
         ]);
     }
 
-    // Google OAuth Redirect
+    
     public function redirectToGoogle()
     {
         return Socialite::driver('google')->stateless()->redirect();
     }
 
-    // Google OAuth Callback
+    
     public function handleGoogleCallback()
     {
         try {
@@ -48,7 +48,7 @@ class AuthController extends Controller
                 [
                     'name' => $googleUser->getName(),
                     'google_id' => $googleUser->getId(),
-                    'password' => null, // User OAuth tidak punya password
+                    'password' => null, 
                 ]
             );
 
