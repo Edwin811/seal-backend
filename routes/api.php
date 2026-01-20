@@ -21,8 +21,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Leave Routes
-    Route::get('/leaves', [LeaveController::class, 'index']);      // List Cuti
-    Route::post('/leaves', [LeaveController::class, 'store']);     // Ajukan Cuti
-    Route::put('/leaves/{id}/status', [LeaveController::class, 'updateStatus']); // Approve/Reject (Admin)
+    Route::get('/leaves', [LeaveController::class, 'index']);
+    Route::post('/leaves', [LeaveController::class, 'store']);
+    Route::put('/leaves/{id}/status', [LeaveController::class, 'updateStatus']);
     
 });
