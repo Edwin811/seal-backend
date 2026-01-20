@@ -45,7 +45,6 @@ class LeaveRepository implements LeaveRepositoryInterface
             $start = Carbon::parse($leave->start_date);
             $end = Carbon::parse($leave->end_date);
             
-            // PERBAIKAN DI SINI: Tambahkan abs() agar tidak minus!
             $diff = abs($end->diffInDays($start)) + 1;
             
             $totalDays += $diff;
